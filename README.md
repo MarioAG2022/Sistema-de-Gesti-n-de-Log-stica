@@ -425,8 +425,9 @@ Password: 123456
 * Timeline history
 * Pull to refresh
 * Loading states
-* Error handling
+* Error handling (Interceptores globales)
 * Responsive UI
+* Detección dinámica de IP para la API
 
 ---
 
@@ -479,5 +480,6 @@ Frontend probado:
 * Prisma ORM se utiliza para acceso tipado a MySQL.
 * MongoDB almacena eventos históricos flexibles.
 * Swagger documenta el contrato completo del backend.
-* Axios utiliza interceptor JWT.
+* Axios utiliza interceptores para inyectar el JWT y manejar globalmente los errores (ej. auto-logout y redirección en 401).
 * AsyncStorage mantiene persistencia de sesión.
+* La app móvil utiliza `expo-constants` para deducir automáticamente la IP local del servidor en desarrollo, evitando IPs hardcodeadas y facilitando la evaluación del reto.
