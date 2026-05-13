@@ -1,24 +1,99 @@
-# Nestjs specific
-/dist
-/node_modules
-/build
-/tmp
+# =========================
+# Dependencies
+# =========================
+node_modules/
 
+# =========================
+# Build output
+# =========================
+dist/
+build/
+web-build/
+
+# =========================
+# Expo / React Native
+# =========================
+.expo/
+.expo-shared/
+
+# =========================
 # Logs
-logs
+# =========================
+logs/
 *.log
 npm-debug.log*
-pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 lerna-debug.log*
 
-# dotenv environment variable files
+# =========================
+# Environment variables
+# =========================
 .env
-.env.development
-.env.test
-.env.production
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# temp directory
-.temp
-.tmp
+# =========================
+# Prisma
+# =========================
+generated/prisma/
+prisma/dev.db
+
+# =========================
+# Coverage / testing
+# =========================
+coverage/
+.nyc_output/
+
+# =========================
+# Runtime
+# =========================
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# =========================
+# Temp files
+# =========================
+.temp/
+.tmp/
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDEs
+# =========================
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# =========================
+# VSCode
+# =========================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# =========================
+# TypeScript
+# =========================
+*.tsbuildinfo
+
+# =========================
+# Diagnostic reports
+# =========================
+report.*.json
