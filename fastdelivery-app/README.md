@@ -1,50 +1,132 @@
-# Welcome to your Expo app 👋
+# FastDelivery App 📦
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+App móvil para repartidores del sistema FastDelivery.  
+Construida con **React Native + Expo + TypeScript**.
 
-## Get started
+---
 
-1. Install dependencies
+## Requisitos
 
-   ```bash
-   npm install
-   ```
+- Node.js ≥ 18 (recomendado ≥ 20)
+- npm ≥ 9
+- Expo Go instalado en el dispositivo/emulador
+- Backend FastDelivery corriendo en `http://localhost:3000`
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Instalación
 
 ```bash
-npm run reset-project
+cd fastdelivery-app
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## Ejecución
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+# Modo desarrollo (QR para Expo Go)
+npx expo start
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+# Solo Android
+npx expo start --android
 
-## Join the community
+# Solo iOS
+npx expo start --ios
+```
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Conectar al backend
+
+La `baseURL` está definida en `src/api/api.ts`:
+
+```ts
+export const BASE_URL = 'http://localhost:3000/api';
+```
+
+> ⚠️ En un dispositivo físico, `localhost` NO apunta al backend de tu PC.  
+> Usá la IP local de tu máquina, por ejemplo: `http://192.168.1.100:3000/api`
+
+Para encontrar tu IP local:
+- Windows: `ipconfig` → buscar "Dirección IPv4"
+- macOS/Linux: `ifconfig` o `ip addr`
+
+---
+
+## Credenciales demo
+
+```
+email:    driver@test.com
+password: 123456
+```
+
+Estas credenciales están pre-cargadas en la pantalla de login.
+
+---
+
+## Estructura del proyecto
+
+```
+fastdelivery-app/
+├── app/               # Rutas (Expo Router)
+│   ├── index.tsx      # Redirect según token
+│   ├── login.tsx      # LoginScreen
+│   └── orders/
+│       ├── index.tsx  # Lista de pedidos
+│       └── [id].tsx   # Detalle + cambio de estado
+├── src/
+│   ├── api/           # Axios + interceptor JWT
+│   ├── components/    # OrderCard, StatusBadge, HistoryItem
+│   ├── hooks/         # useAuth, useOrders, useOrderDetail
+│   ├── services/      # auth.service, orders.service
+│   ├── storage/       # AsyncStorage (token + user)
+│   ├── types/         # Tipos TypeScript del swagger
+│   └── utils/         # expo-location wrapper
+└── frontend-architecture.md
+```
+
+---
+
+## Dependencias principales
+
+| Paquete | Versión | Uso |
+|---------|---------|-----|
+| `expo` | ~54 | Framework |
+| `expo-router` | ~6 | Navegación file-based |
+| `axios` | latest | HTTP client |
+| `@react-native-async-storage/async-storage` | ^2 | Persistencia JWT |
+| `expo-location` | ^18 | GPS para cambio de estado |
+| `react-native-safe-area-context` | ~5 | SafeAreaView |
+
+---
+
+## Flujo de la app
+
+1. Abrís la app → verifica si hay token → redirige automáticamente
+2. Sin token → pantalla de Login
+3. Login exitoso → guarda JWT → lista de pedidos del driver
+4. Tocás un pedido → detalle con cliente, dirección e historial
+5. "Cambiar estado" → seleccionás nuevo estado + comentario opcional → captura GPS → envía al backend
+
+---
+
+## Variables de entorno (futuro)
+
+Para múltiples entornos, crear `app.config.js` y usar `expo-constants`:
+
+```js
+// app.config.js
+export default {
+  extra: {
+    apiUrl: process.env.API_URL ?? 'http://localhost:3000/api',
+  },
+};
+```
+
+```ts
+// src/api/api.ts
+import Constants from 'expo-constants';
+const BASE_URL = Constants.expoConfig?.extra?.apiUrl;
+```
