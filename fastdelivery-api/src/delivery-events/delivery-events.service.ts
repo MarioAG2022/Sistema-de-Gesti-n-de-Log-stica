@@ -40,6 +40,9 @@ export class DeliveryEventsService {
   async getOrderHistory(orderId: number) {
     return this.deliveryEventModel
       .find({ orderId })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: 1 })   // ascendente: más antiguo primero
+      .lean()                    // IMPORTANTE: retorna POJOs, no Documents
+                                 // sin .lean() los timestamps virtuales no se serializan
+      .exec();
   }
 }

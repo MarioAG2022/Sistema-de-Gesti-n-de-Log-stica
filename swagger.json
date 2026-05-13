@@ -1,0 +1,262 @@
+{
+    "openapi": "3.0.0",
+    "paths": {
+        "/api/auth/login": {
+            "post": {
+                "description": "Autentica un usuario y retorna JWT",
+                "operationId": "AuthController_login",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login exitoso"
+                    },
+                    "401": {
+                        "description": "Credenciales inválidas"
+                    }
+                },
+                "summary": "Login de usuario",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/api/orders/driver/{driverId}": {
+            "get": {
+                "description": "Devuelve todos los pedidos asignados al repartidor indicado, incluyendo datos del cliente.",
+                "operationId": "OrdersController_findByDriver",
+                "parameters": [
+                    {
+                        "name": "driverId",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "example": 1,
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de pedidos (puede ser vacía)"
+                    },
+                    "401": {
+                        "description": "No autorizado — JWT requerido"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Pedidos de un repartidor",
+                "tags": [
+                    "Orders"
+                ]
+            }
+        },
+        "/api/orders/{id}": {
+            "get": {
+                "description": "Devuelve el pedido con cliente y repartidor. Lanza 404 si no existe.",
+                "operationId": "OrdersController_findOne",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "example": 1,
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pedido encontrado"
+                    },
+                    "401": {
+                        "description": "No autorizado — JWT requerido"
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Detalle de un pedido",
+                "tags": [
+                    "Orders"
+                ]
+            }
+        },
+        "/api/orders/{id}/status": {
+            "patch": {
+                "description": "Cambia el estado en MySQL y registra un evento de trazabilidad en MongoDB. Estados válidos: PENDING, ON_ROUTE, DELIVERED, CANCELLED.",
+                "operationId": "OrdersController_updateStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "example": 1,
+                            "type": "number"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateOrderStatusDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Estado actualizado y evento registrado"
+                    },
+                    "400": {
+                        "description": "Estado inválido"
+                    },
+                    "401": {
+                        "description": "No autorizado — JWT requerido"
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Actualizar estado del pedido",
+                "tags": [
+                    "Orders"
+                ]
+            }
+        },
+        "/api/orders/{id}/history": {
+            "get": {
+                "description": "Devuelve el pedido (MySQL) más el historial completo de cambios de estado (MongoDB).",
+                "operationId": "OrdersController_findHistory",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "example": 1,
+                            "type": "number"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pedido e historial de eventos"
+                    },
+                    "401": {
+                        "description": "No autorizado — JWT requerido"
+                    },
+                    "404": {
+                        "description": "Pedido no encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Historial de eventos de un pedido",
+                "tags": [
+                    "Orders"
+                ]
+            }
+        }
+    },
+    "info": {
+        "title": "FastDelivery API",
+        "description": "API para gestión de logística de última milla",
+        "version": "1.0",
+        "contact": {}
+    },
+    "tags": [],
+    "servers": [],
+    "components": {
+        "securitySchemes": {
+            "bearer": {
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "type": "http"
+            }
+        },
+        "schemas": {
+            "LoginDto": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "example": "driver@test.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "example": "123456"
+                    }
+                },
+                "required": [
+                    "email",
+                    "password"
+                ]
+            },
+            "UpdateOrderStatusDto": {
+                "type": "object",
+                "properties": {
+                    "newStatus": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "ON_ROUTE",
+                            "DELIVERED",
+                            "CANCELLED"
+                        ],
+                        "example": "ON_ROUTE",
+                        "description": "Nuevo estado del pedido"
+                    },
+                    "lat": {
+                        "type": "number",
+                        "example": 25.6714,
+                        "description": "Latitud de la ubicación del repartidor"
+                    },
+                    "lng": {
+                        "type": "number",
+                        "example": -100.3099,
+                        "description": "Longitud de la ubicación del repartidor"
+                    },
+                    "comment": {
+                        "type": "string",
+                        "example": "El cliente no estaba en casa",
+                        "description": "Comentario adicional sobre el cambio de estado"
+                    }
+                },
+                "required": [
+                    "newStatus"
+                ]
+            }
+        }
+    }
+}

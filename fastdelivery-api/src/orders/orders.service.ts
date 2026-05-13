@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { DeliveryEventsService } from '../delivery-events/delivery-events.service';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
@@ -18,6 +18,9 @@ export class OrdersService {
       where: { driverId },
       include: {
         customer: true,
+        driver: {
+          select: { id: true, name: true, email: true, role: true },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -57,6 +60,18 @@ export class OrdersService {
     }
 
     const previousStatus = order.status;
+    const newStatus = dto.newStatus;
+
+    const validTransitions: Record<string, string[]> = {
+      PENDING: ['ON_ROUTE', 'CANCELLED'],
+      ON_ROUTE: ['DELIVERED', 'CANCELLED'],
+      DELIVERED: [],
+      CANCELLED: [],
+    };
+
+    if (previousStatus === newStatus || !validTransitions[previousStatus]?.includes(newStatus)) {
+      throw new BadRequestException(`Invalid status transition from ${previousStatus} to ${newStatus}`);
+    }
 
     const updated = await this.prisma.order.update({
       where: { id },
@@ -82,7 +97,12 @@ export class OrdersService {
   async findHistory(id: number) {
     const order = await this.prisma.order.findUnique({
       where: { id },
-      include: { customer: true },
+      include: {
+        customer: true,
+        driver: {
+          select: { id: true, name: true, email: true, role: true },
+        },
+      },
     });
 
     if (!order) {

@@ -40,8 +40,9 @@ model User {
 model Customer {
   id        Int      @id @default(autoincrement())
   name      String
-  phone     String
-  address   String
+  email     String?
+  phone     String?
+  address   String?
 
   orders    Order[]
 
@@ -53,6 +54,7 @@ model Order {
   id          Int          @id @default(autoincrement())
   trackingId  String       @unique
   status      OrderStatus  @default(PENDING)
+  address     String?
 
   driverId    Int
   customerId  Int
